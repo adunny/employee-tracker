@@ -1,16 +1,15 @@
 const inquirer = require('inquirer');
-const cTable = require('console.table');
-const art = require('ascii-art');
-const getDepartments = require('./db/queries');
-const render = require('../../weekly-challenge-10/team-profile-generator/Develop/lib/htmlRenderer');
+const { getDepartments, getRoles, getEmployees } = require('./db/queries');
 
-function renderMenu() {
-    console.log(`
-    .-=-=-=-=-=-=-=-=--.
-    | Employee Manager |
-    '-=-=-=-=-=-=-=-=--'
-    `);
-    return inquirer
+
+console.log(`
+.-=-=-=-=-=-=-=-=--.
+| Employee Manager |
+'-=-=-=-=-=-=-=-=--'
+`);
+
+async function renderMenu() {
+    const data = await inquirer
         .prompt([
             {
                 type: 'list',
@@ -26,12 +25,19 @@ function renderMenu() {
                     'Update an employee role'
                 ]
             }
-        ])
-        .then(data => {
-            if (data.mainMenu === 'View all departments') {
-                getDepartments();
-            }
-        });
+        ]);
+    if (data.mainMenu === 'View all departments') {
+    
+        getDepartments();
+        setTimeout(() => renderMenu(), 1000);
+    } else if(data.mainMenu === 'View all roles') {
+        getRoles();
+        setTimeout(() => renderMenu(), 1000);
+    } else if (data.mainMenu === 'View all employees') {
+        getEmployees();
+        setTimeout(() => renderMenu(), 1000);
+    }
+
 }
 
 
