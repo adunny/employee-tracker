@@ -7,7 +7,6 @@ function getDepartments() {
         if (err) {
             console.log(err);
         }
-        
         printTable(results);
     });
 };
@@ -18,7 +17,7 @@ function getRoles() {
     role.salary,
     department.name AS department
     FROM role
-    JOIN department ON department.id = role.id`;
+    JOIN department ON department.id = role.department_id`;
     db.query(sql, (err, results) => {
         if (err) {
             console.log(err)
@@ -46,5 +45,17 @@ function getEmployees() {
     })
 };
 
+function AddDepartment(data) {
+    const sql = `INSERT INTO department(name) VALUES(?)`;
+    const params = [data.department];
 
-module.exports = { getDepartments, getRoles, getEmployees };
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log('Added department!');
+    });
+};
+
+
+module.exports = { getDepartments, getRoles, getEmployees, AddDepartment };
