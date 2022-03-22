@@ -3,9 +3,12 @@ const {
     getDepartments,
     getRoles,
     getEmployees,
-    AddDepartment 
+    addDepartment,
+    addRole,
+    getDepartmentId
 } = require('./db/queries');
 
+let departmentsArr = ['Engineering', 'Finance', 'Legal', 'Sales'];
 
 console.log(`
 .-=-=-=-=-=-=-=-=--.
@@ -41,11 +44,13 @@ async function renderMenu() {
         getEmployees();
         setTimeout(() => renderMenu(), 1000);
     } else if (data.mainMenu === 'Add a department') {
-        promptAddDepartment();
+        promptAddDepartment(departmentsArr);
+    } else if (data.mainMenu === 'Add a role') {
+        promptAddRole(departmentsArr);
     }
 };
 
-async function promptAddDepartment() {
+async function promptAddDepartment(departmentsArr) {
     const data = await inquirer
     .prompt([
         {
@@ -56,28 +61,45 @@ async function promptAddDepartment() {
                 if (input) {
                     return true;
                 } else {
-                    console.log('You must provide a name for this department.');
-                    return false;
+                    return 'You must provide a name for this department.';
                 }
             }
         }
     ]);
-    AddDepartment(data);
-    setTimeout(() => renderMenu(), 1000);
+    departmentsArr.push(data.department);
+    console.log(departmentsArr);
+    addDepartment(data);
+    setTimeout(() => renderMenu(departmentsArr), 1000);
 };
 
-async function promptAddRole() {
+async function promptAddRole(departmentsArr) {
     const data = await inquirer
     .prompt([
         {
-            type: 'text',
+            type: 'input',
             name: 'roleName',
             message: 'Enter new role name:'
         },
         {
-            type: ''
+            type: 'input',
+            name: 'salary',
+            message: 'Enter the salary of this role:',
+            validate: input => {
+                if( isNaN(input) || !input ) {
+                    return 'Must be a numeric value!';
+                }
+                return true;
+            }
+        },
+        {
+            type: 'list',
+            name: 'departmentList',
+            message: 'Select the department this role will belong to:',
+            choices: departmentsArr
         }
-    ])
+    ]);
+    getDepartmentId(data);
+    setTimeout(() => renderMenu(departmentsArr), 1000);
 }
 
 renderMenu();

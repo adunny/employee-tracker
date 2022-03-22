@@ -45,7 +45,7 @@ function getEmployees() {
     })
 };
 
-function AddDepartment(data) {
+function addDepartment(data) {
     const sql = `INSERT INTO department(name) VALUES(?)`;
     const params = [data.department];
 
@@ -56,6 +56,32 @@ function AddDepartment(data) {
         console.log('Added department!');
     });
 };
+function getDepartmentId(data) {
+    const sql = `SELECT id FROM department WHERE name = ?`
+    const params = [data.departmentList];
+    db.query(sql, params, (err, departmentId) => {
+        if (err) {
+            console.log(err);
+        }
+        addRole(departmentId, data);
+    })
+
+}
+function addRole(departmentId, data) {
+    const sql = `INSERT INTO role(title, salary, department_id)
+    VALUES(?,?,?)`;
+    const params = [data.roleName, data.salary, departmentId[0].id];
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+        
+        console.log('Role added')
+    })
+    
+
+}
 
 
-module.exports = { getDepartments, getRoles, getEmployees, AddDepartment };
+module.exports = { getDepartments, getRoles, getEmployees, addDepartment, getDepartmentId};
