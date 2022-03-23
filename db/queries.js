@@ -1,6 +1,8 @@
 const db = require('./connection');
 const { printTable } = require('console-table-printer');
 
+
+
 function getDepartments() {
     const sql = `SELECT * FROM department`;
     db.query(sql, (err, results) => {
@@ -56,32 +58,29 @@ function addDepartment(data) {
         console.log('Added department!');
     });
 };
-function getDepartmentId(data) {
+
+function addRole(data) {
+    // query to get department id
     const sql = `SELECT id FROM department WHERE name = ?`
     const params = [data.departmentList];
     db.query(sql, params, (err, departmentId) => {
         if (err) {
             console.log(err);
         }
-        addRole(departmentId, data);
-    })
+        // query again with department id
+        const sql = `INSERT INTO role(title, salary, department_id)
+        VALUES(?,?,?)`;
+        const params = [data.roleName, data.salary, departmentId[0].id];
 
-}
-function addRole(departmentId, data) {
-    const sql = `INSERT INTO role(title, salary, department_id)
-    VALUES(?,?,?)`;
-    const params = [data.roleName, data.salary, departmentId[0].id];
-
-    db.query(sql, params, (err, results) => {
-        if (err) {
-            console.log(err);
-        }
-        
-        console.log('Role added')
-    })
-    
-
-}
+        db.query(sql, params, (err, results) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log('Role added!')
+        });
+    });
+};
 
 
-module.exports = { getDepartments, getRoles, getEmployees, addDepartment, getDepartmentId};
+
+module.exports = { getDepartments, getRoles, getEmployees, addDepartment, addRole};
