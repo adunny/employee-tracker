@@ -29,16 +29,18 @@ function getRoles() {
 };
 
 function getEmployees() {
-    const sql = `SELECT employee.id,
-    employee.first_name,
-    employee.last_name,
+    const sql = `SELECT e.id,
+    e.first_name,
+    e.last_name,
     role.title,
     department.name AS department,
-    role.salary AS salary
-    FROM employee
-    JOIN role ON employee.role_id = role.id
+    role.salary,
+    CONCAT(m.first_name, ' ', m.last_name) AS manager
+    FROM employee e
+    JOIN role ON e.role_id = role.id
     JOIN department ON department.id = role.department_id
-    ORDER BY employee.id`;
+    LEFT JOIN employee m ON e.id = m.manager_id
+    ORDER BY e.id;`;
     db.query(sql, (err, results) => {
         if (err) {
             console.log(err)
