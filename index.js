@@ -5,7 +5,8 @@ const {
     getRoles,
     getEmployees,
     addDepartment,
-    addRole
+    addRole,
+    addEmployee
 } = require('./db/queries');
 
 const db = require('./db/connection');
@@ -21,7 +22,7 @@ console.log(`
 `);
 
 // main menu
-async function renderMenu(departmentsArr) {
+async function renderMenu() {
     const data = await inquirer
         .prompt([
             {
@@ -40,24 +41,24 @@ async function renderMenu(departmentsArr) {
             }
         ]);
     if (data.mainMenu === 'View all departments') {
-        getDepartments(departmentsArr);
-        setTimeout(() => renderMenu(departmentsArr), 1000);
+        getDepartments();
+        setTimeout(() => renderMenu(), 1000);
     } else if(data.mainMenu === 'View all roles') {
-        getRoles(departmentsArr);
-        setTimeout(() => renderMenu(departmentsArr), 1000);
+        getRoles();
+        setTimeout(() => renderMenu(), 1000);
     } else if (data.mainMenu === 'View all employees') {
-        getEmployees(departmentsArr);
-        setTimeout(() => renderMenu(departmentsArr), 1000);
+        getEmployees();
+        setTimeout(() => renderMenu(), 1000);
     } else if (data.mainMenu === 'Add a department') {
-        promptAddDepartment(departmentsArr);
+        promptAddDepartment();
     } else if (data.mainMenu === 'Add a role') {
-        promptAddRole(departmentsArr);
+        queryDeparments();
     } else if (data.mainMenu === 'Add an employee') {
-        promptAddEmployee();
+        queryRoles();
     }
 };
 
-async function promptAddDepartment(departmentsArr) {
+async function promptAddDepartment() {
     const data = await inquirer
     .prompt([
         {
@@ -73,9 +74,8 @@ async function promptAddDepartment(departmentsArr) {
             }
         }
     ]);
-    departmentsArr.push(data.department);
     addDepartment(data);
-    setTimeout(() => renderMenu(departmentsArr), 1000);
+    setTimeout(() => renderMenu(), 1000);
 };
 
 async function promptAddRole(departmentsArr) {
@@ -105,36 +105,76 @@ async function promptAddRole(departmentsArr) {
         }
     ]);
     addRole(data);
-    setTimeout(() => renderMenu(departmentsArr), 1000);
+    setTimeout(() => renderMenu(), 1000);
 };
 
-// generate dynamic departments array
-db.query(`SELECT name FROM department`, (err, results) => {
-    if (err) {
-        console.log(err);
-    }
-    let arr = results.map(department => {
-        return department.name;
-    })
-    renderArray(arr);
-});
-function renderArray(arr) {
-    let departmentsArr = arr;
-    renderMenu(departmentsArr);
-};
 
-async function promptAddEmployee() {
-    const data = await inquirer
-    .prompt([
-        {
-            type: 'input',
-            name: 'firstName',
-            message: "Enter the employee's first name:"
-        },
-        {
-            type: 'input',
-            name: 'lastName',
-            message: "Enter the employees's last name:"
+function queryDeparments() {
+    db.query(`SELECT name FROM department`, (err, results) => {
+        if (err) {
+            console.log(err);
         }
-    ])
+        let arr = results.map(department => {
+            return department.name;
+        })
+        promptAddRole(arr);
+    });
 }
+
+function queryRoles() {
+    db.query(`SELECT id, title FROM role`, (err, rows) => {
+        if (err) {
+            console.log(err);
+        }
+        let roleList = rows.map(({ id, title }) => ({ name: title, value: id }))
+        queryManagers(roleList);
+    });
+}
+
+function queryManagers(roleList) {
+    const sql = `SELECT CONCAT(e.first_name, ' ',  e.last_name) AS name,
+    id
+    FROM employee e`
+
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.log(err);
+        }
+        let managerList = rows.map(({ name, id}) => ({name, value: id}))
+        promptAddEmployee(roleList, managerList);
+    })
+}
+
+async function promptAddEmployee(roleList, managerList) {
+    
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'firstName',
+                message: "Enter the employee's first name:"
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: "Enter the employees's last name:"
+            },
+            {
+                type: 'list',
+                name: "selectRole",
+                message: "Select this employee's role:",
+                choices: roleList
+            },
+            {
+                type: 'list',
+                name: 'selectManager',
+                message: "Select this employee's manager:",
+                choices: managerList
+            }
+        ]);
+    addEmployee(data);
+    setTimeout(() => renderMenu(), 1000);
+}
+
+renderMenu();
+

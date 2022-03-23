@@ -35,11 +35,11 @@ function getEmployees() {
     role.title,
     department.name AS department,
     role.salary,
-    CONCAT(m.first_name, ' ', m.last_name) AS manager
+    CONCAT(m.first_name, ' ', m.last_name) as manager
     FROM employee e
     JOIN role ON e.role_id = role.id
     JOIN department ON department.id = role.department_id
-    LEFT JOIN employee m ON e.id = m.manager_id
+    LEFT JOIN employee m ON m.id = e.manager_id
     ORDER BY e.id;`;
     db.query(sql, (err, results) => {
         if (err) {
@@ -83,6 +83,25 @@ function addRole(data) {
     });
 };
 
+function addEmployee(data) {
+    const sql = `INSERT INTO employee(first_name, last_name, role_id, manager_id)
+    VALUES (?,?,?,?)`;
+    const params = [data.firstName, data.lastName, data.selectRole, data.selectManager]
+    db.query(sql, params, (err, rows) => {
+        if (err) {
+            console.log(err);
+        }
+        console.log('Employee added!');
+    });
+};
 
 
-module.exports = { getDepartments, getRoles, getEmployees, addDepartment, addRole};
+
+module.exports = { 
+    getDepartments, 
+    getRoles, 
+    getEmployees, 
+    addDepartment, 
+    addRole, 
+    addEmployee
+};
