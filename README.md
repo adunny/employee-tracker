@@ -21,8 +21,10 @@ A node app that allows you to manage your employees and departments using a SQL 
 ```
 npm install
 ```
+- Create the database and tables found in the /db directory using a MySQL IDE of your choice
   
 ## Usage
+
 - In a terminal, run the following command:
 ```
 node index
