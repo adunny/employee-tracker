@@ -55,6 +55,8 @@ async function renderMenu() {
         queryDeparments();
     } else if (data.mainMenu === 'Add an employee') {
         queryRoles();
+    } else if (data.mainMenu === 'Update an employee role') {
+
     }
 };
 
@@ -140,7 +142,13 @@ function queryManagers(roleList) {
         if (err) {
             console.log(err);
         }
+        console.log(rows)
         let managerList = rows.map(({ name, id}) => ({name, value: id}))
+        const obj = { name: 'None', value: null }
+        if(!managerList.find(obj => obj.name === 'None')){ 
+            managerList.push(obj)
+        }
+        console.log(managerList)
         promptAddEmployee(roleList, managerList);
     })
 }
@@ -174,6 +182,24 @@ async function promptAddEmployee(roleList, managerList) {
         ]);
     addEmployee(data);
     setTimeout(() => renderMenu(), 1000);
+}
+
+async function promptUpdateEmployee() {
+    const data = await inquirer
+    .prompt([
+        {
+            type: 'list',
+            name: 'updateName',
+            message: 'Which employee would you like to update?',
+            choices: []
+        },
+        {
+            type: 'list',
+            name: 'updateRole',
+            message: 'Select a new role for this employee.',
+            choices: []
+        }
+    ])
 }
 
 renderMenu();
