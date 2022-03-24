@@ -6,7 +6,8 @@ const {
     getEmployees,
     addDepartment,
     addRole,
-    addEmployee
+    addEmployee,
+    updateEmployee
 } = require('./db/queries');
 
 const db = require('./db/connection');
@@ -56,7 +57,7 @@ async function renderMenu() {
     } else if (data.mainMenu === 'Add an employee') {
         queryRoles();
     } else if (data.mainMenu === 'Update an employee role') {
-
+        employeeList();
     }
 };
 
@@ -142,13 +143,13 @@ function queryManagers(roleList) {
         if (err) {
             console.log(err);
         }
-        console.log(rows)
+
         let managerList = rows.map(({ name, id}) => ({name, value: id}))
         const obj = { name: 'None', value: null }
+    
         if(!managerList.find(obj => obj.name === 'None')){ 
             managerList.push(obj)
         }
-        console.log(managerList)
         promptAddEmployee(roleList, managerList);
     })
 }
@@ -184,22 +185,38 @@ async function promptAddEmployee(roleList, managerList) {
     setTimeout(() => renderMenu(), 1000);
 }
 
-async function promptUpdateEmployee() {
+async function promptUpdateEmployee(employees, roles) {
     const data = await inquirer
     .prompt([
         {
             type: 'list',
             name: 'updateName',
             message: 'Which employee would you like to update?',
-            choices: []
+            choices: employees
         },
         {
             type: 'list',
             name: 'updateRole',
             message: 'Select a new role for this employee.',
-            choices: []
+            choices: roles
         }
-    ])
+    ]);
+    updateEmployee(data);
+    setTimeout(() => renderMenu(), 1000);
+}
+
+function employeeList() {
+    const sql = `SELECT CONCAT(e.first_name, ' ',  e.last_name) AS name, id AS value FROM employee e`
+    db.query(sql, (err, rows) => {
+        roleList(rows)
+    })
+}
+
+function roleList(employees) {
+    const sql = `SELECT title AS name, id AS value FROM role`
+    db.query(sql, (err, rows)=> {
+        promptUpdateEmployee(employees, rows)
+    })
 }
 
 renderMenu();

@@ -95,6 +95,17 @@ function addEmployee(data) {
     });
 };
 
+function updateEmployee(data) {
+    const sql = `UPDATE employee e
+    SET e.role_id = ?
+    WHERE id = ?`
+    const params = [data.updateRole, data.updateName]
+    db.query(sql, params, (err, rows) => {
+        if (err) throw err
+        console.log('Employee updated!');
+    })
+}
+
 
 
 module.exports = { 
@@ -103,5 +114,6 @@ module.exports = {
     getEmployees, 
     addDepartment, 
     addRole, 
-    addEmployee
+    addEmployee,
+    updateEmployee
 };
